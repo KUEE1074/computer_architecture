@@ -34,11 +34,11 @@ heapify_insert:
     lw $s4, 0($t0)    ## $s4 == parent value
 
     slt $t0, $s3, $s4
-    beq $t0, $zero, swap1 
+    beq $t0, $zero, L1 
     j copy
 
-print:                    ## sort 결과 print
-    mul $t6, $s1, 4
+print:                    ## 배열 맨끝으로 옮겨진 값 print
+    mul $t6, $s1, 4       ## 최댓값 뽑을때마다 print
     add $t6, $t6, $a2
     lw $t5, 0($t6)
     li $v0, 1
@@ -54,9 +54,9 @@ print:                    ## sort 결과 print
     j input
     
 copy:                      ## heapify된 heap에서 out으로 data 복사
-    add $t6, $a1, $t7
-    lw $t5, 0($t6)
-    add $t6, $a2, $t7
+    add $t6, $a1, $t7      ## 전체를 다 뽑아내야 하므로 이전 heap을 유지해 놓지
+    lw $t5, 0($t6)         ## 않으면 넣을 때마다 전체 heapify가 필요함
+    add $t6, $a2, $t7      ## 따라서 copy를 통해 유지해 놓음
     sw $t5, 0($t6)
     addi $s1, $s1, -1
     addi $t7, $t7, 4
@@ -80,10 +80,10 @@ heapify_pop:            ## top->bottom heapify
     addi $t3, $t8, 1        ## right child의 index
     slt $t4, $t2, $s1       ## left child의 index가 배열 크기보다 
     beq $t4, $zero, print   ## 크거나 같으면 바로 print로 jump (child가 x)
-    beq $t3, $s1, swap2     ## right child의 index가 배열 크기와 같으면 jump (child가 1개)
-    j swap4                 ## 일반적인 경우(child가 둘다 있는 경우)
+    beq $t3, $s1, L2     ## right child의 index가 배열 크기와 같으면 jump (child가 1개)
+    j L4                 ## 일반적인 경우(child가 둘다 있는 경우)
 
-swap1:
+L1:
     mul $t0, $t2, 4
     add $t0, $t0, $a1
     sw $s4, 0($t0)
@@ -93,7 +93,7 @@ swap1:
     move $t2, $t3
     j heapify_insert
 
-swap2:
+L2:
     mul $t8, $s3, 4
     add $t8, $t8, $a2 
     lw $s5, 0($t8)      ## current node value
@@ -101,15 +101,15 @@ swap2:
     add $t9, $t9, $a2 
     lw $s6, 0($t9)      ## left child node value
     slt $t6, $s5, $s6
-    bne $t6, $zero, swap3   ## current < left_child 이면 swap3로 점프
+    bne $t6, $zero, L3   ## current < left_child 이면 L3로 점프
     j print
 
-swap3:              ## current와 left child값 변경
+L3:              ## current와 left child값 변경
     sw $s5, 0($t9)
     sw $s6, 0($t8)
     j print
 
-swap4:
+L4:
     mul $t8, $t2, 4
     add $t8, $t8, $a2 
     lw $s5, 0($t8)      ## left child value
@@ -125,26 +125,26 @@ win_left:  ## left > right
     add $t9, $t9, $a2 
     lw $t3, 0($t9)       ## root
     slt $t4, $t3, $s5
-    beq $t4, $zero, print
+    beq $t4, $zero, print  ## 노드 변경이 없으면 print로
     sw $s5, 0($t9)
     sw $t3, 0($t8) 
     move $s3, $t2
-    j heapify_pop
+    j heapify_pop  ##변경을 하고난 뒤에는 다시 heapify를 진행
 
 win_right: ## left < right
-    mul $t8 $s3, 4
+    mul $t8, $s3, 4
     add $t8, $t8, $a2 
-    lw $t3, 0($t8)       ## root
-    slt $t4, $t3, $s6
-    beq $t4, $zero, print
+    lw $t2, 0($t8)       ## root
+    slt $t4, $t2, $s6
+    beq $t4, $zero, print   ## 노드 변경이 없으면 print로
     sw $s6, 0($t8)
-    sw $t3, 0($t9)
+    sw $t2, 0($t9)
     move $s3, $t3
-    j heapify_pop
+    j heapify_pop ##변경을 하고난 뒤에는 다시 heapify를 진행
 
 .data
-heap: .space 100
-out: .space 100
+heap: .space 1000
+out: .space 1000
 msg1: .asciiz "\n숫자를 입력하세요 "
 msg2: .asciiz "Heap sort출력 결과 "
 msg3: .asciiz " "
