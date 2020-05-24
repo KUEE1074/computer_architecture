@@ -105,7 +105,7 @@ inverse:
     mul.s $f21, $f2, $f7
     sub.s $f22, $f21, $f20
     div.s $f22, $f22, $f10
-    swc1 $f22, c3r3
+    swc1 $f22, c3r2
 
     mul.s $f20, $f1, $f5
     mul.s $f21, $f2, $f4
